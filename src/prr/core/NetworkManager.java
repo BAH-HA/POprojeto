@@ -12,8 +12,6 @@ import prr.core.exception.MissingFileAssociationException;
 import prr.core.exception.UnavailableFileException;
 import prr.core.exception.UnrecognizedEntryException;
 
-//FIXME add more import if needed (cannot import from pt.tecnico or prr.app)
-
 /**
  * Manage access to network and implement load/save operations.
  */
@@ -28,18 +26,24 @@ public class NetworkManager {
   public Network getNetwork() {
     return _network;
   }
-  
+
+  public String getFilename() {
+    return _filename;
+  }
+
   /**
    * @param filename name of the file containing the serialized application's state
    *        to load.
    * @throws UnavailableFileException if the specified file does not exist or there is
    *         an error while processing this file.
    */
-  public void load(String filename) throws UnavailableFileException {
+  public void load(String filename) throws UnavailableFileException, ClassNotFoundException {
     _filename = filename;
-
-    try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(filename))){
-      _network = (Network) input.readObject();
+    try (ObjectInputStream objectIn = new ObjectInputStream(new FileInputStream(filename))) {
+      _network = (Network)objectIn.readObject();
+      _filename = (String)objectIn.readObject();
+    } catch (ClassNotFoundException | IOException e) {
+      throw new UnavailableFileException(filename);
     }
   }
   
@@ -51,14 +55,18 @@ public class NetworkManager {
    * @throws IOException if there is some error while serializing the state of the network to disk.
    */
   public void save() throws FileNotFoundException, MissingFileAssociationException, IOException {
-    try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(_filename))){
-      out.writeObject(_network);
+    if (_filename == null) {
+      throw new MissingFileAssociationException();
+    }
+    try (ObjectOutputStream objectOut = new ObjectOutputStream(new FileOutputStream(_filename))) {
+      objectOut.writeObject(_network);
+      objectOut.writeObject(_filename);
     }
   }
   
   /**
    * Saves the serialized application's state into the specified file. The current network is
-   * associated to this file.
+   * associated to  this file.
    *
    * @param filename the name of the file.
    * @throws FileNotFoundException if for some reason the file cannot be created or opened.
@@ -67,7 +75,6 @@ public class NetworkManager {
    */
   public void saveAs(String filename) throws FileNotFoundException, MissingFileAssociationException, IOException {
      _filename = filename; 
-     
     save();
   }
   
@@ -76,8 +83,6 @@ public class NetworkManager {
    * 
    * @param filename name of the text input file
    * @throws ImportFileException
-   * @throws IOException
-   * @throws UnrecognizedEntryException
    */
   public void importFile(String filename) throws ImportFileException {
     try {
