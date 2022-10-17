@@ -29,7 +29,8 @@ public class Client {
 	}
 
 	public String toString(){
-        return _key + "|" + _name + "|" + _taxNumber + "| ...";
+        return "CLIENT|" + _key + "|" + _name + "|" + _taxNumber + "| ...";
+        // CLIENT|key|name|taxId|type|notifications|terminals|payments|debts
     }
 	
 }

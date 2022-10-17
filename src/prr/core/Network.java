@@ -3,10 +3,15 @@ package prr.core;
 import java.io.Serializable;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.TreeMap;
+import java.util.Map;
+import java.util.Collection;
 
 import prr.core.exception.UnrecognizedEntryException;
+import prr.core.exception.DuplicateClientKeyException;
+import prr.core.exception.UnknownClientKeyException;
 import prr.core.Client;
 import prr.core.Terminal;
 
@@ -19,17 +24,11 @@ public class Network implements Serializable {
 
   /** Serial number for serialization. */
   private static final long serialVersionUID = 202208091753L;
-  private List<Client> _clients;
-  private List<Terminal> _terminals;
 
-  // FIXME define attributes
-  // FIXME define contructor(s)
-  // FIXME define methods
-  public Network(){
-    _clients = new ArrayList<>();
-    _terminals = new ArrayList<>();
-  }
-  
+  private final Map<String, Client> _clients = new TreeMap<>();
+
+  private final Map<String, Terminal> _terminals = new TreeMap<>();
+
   /**
    * Read text input file and create corresponding domain entities.
    * 
@@ -44,20 +43,29 @@ public class Network implements Serializable {
   /**
    * Registers a client
    */
-  public void registerClient(String name, int taxNumber, String key) {
+  public Client registerClient(String name, int taxNumber, String key) 
+          throws DuplicateClientKeyException {
+      
+    if (this._clients.containsKey(key)) {
+      throw new DuplicateClientKeyException(key);
+    }
+
     Client c = new Client(name, taxNumber, key);
-    //System.out.println(c.toString());
-    _clients.add(c);
+    this._clients.put(key, c);
+    return c;
+  }
+  
+  public Collection<Client> getAllClients() {
+    return this._clients.values();
   }
 
-  /**
-   * returns a list of all clients
-   * @return
-   */ 
-  public List<Client> getClients(){
-    return Collections.unmodifiableList(_clients);
+  public Client getClient(String key) throws UnknownClientKeyException {
+    Client c = this._clients.get(key);
+    if (c == null) {
+      throw new UnknownClientKeyException(key);
+    }
+    return c;
   }
- 
 
   /**
    * Starts a Text Communication

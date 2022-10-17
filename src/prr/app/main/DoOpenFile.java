@@ -11,10 +11,10 @@ import pt.tecnico.uilib.menus.CommandException;
  * Command to open a file.
  */
 class DoOpenFile extends Command<NetworkManager> {
+ // private Input<String> _filename;
 
   DoOpenFile(NetworkManager receiver) {
     super(Label.OPEN_FILE, receiver);
-    //FIXME add command fields
   }
   
   @Override

@@ -2,6 +2,10 @@ package prr.core;
 
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import prr.core.exception.ImportFileException;
 import prr.core.exception.MissingFileAssociationException;
@@ -15,9 +19,11 @@ import prr.core.exception.UnrecognizedEntryException;
  */
 public class NetworkManager {
 
+  /** Name of the file storing the Network */
+  private String _filename = "";
+
   /** The network itself. */
   private Network _network = new Network();
-  //FIXME  addmore fields if needed
   
   public Network getNetwork() {
     return _network;
@@ -30,7 +36,11 @@ public class NetworkManager {
    *         an error while processing this file.
    */
   public void load(String filename) throws UnavailableFileException {
-    //FIXME implement serialization method
+    _filename = filename;
+
+    try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(filename))){
+      _network = (Network) input.readObject();
+    }
   }
   
   /**
@@ -41,7 +51,9 @@ public class NetworkManager {
    * @throws IOException if there is some error while serializing the state of the network to disk.
    */
   public void save() throws FileNotFoundException, MissingFileAssociationException, IOException {
-    //FIXME implement serialization method
+    try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(_filename))){
+      out.writeObject(_network);
+    }
   }
   
   /**
@@ -54,7 +66,9 @@ public class NetworkManager {
    * @throws IOException if there is some error while serializing the state of the network to disk.
    */
   public void saveAs(String filename) throws FileNotFoundException, MissingFileAssociationException, IOException {
-    //FIXME implement serialization method
+     _filename = filename; 
+     
+    save();
   }
   
   /**
@@ -62,6 +76,8 @@ public class NetworkManager {
    * 
    * @param filename name of the text input file
    * @throws ImportFileException
+   * @throws IOException
+   * @throws UnrecognizedEntryException
    */
   public void importFile(String filename) throws ImportFileException {
     try {

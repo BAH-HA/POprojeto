@@ -4,7 +4,6 @@ import prr.core.Network;
 import prr.app.exception.DuplicateClientKeyException;
 import pt.tecnico.uilib.menus.Command;
 import pt.tecnico.uilib.menus.CommandException;
-//FIXME add more imports if needed
 
 /**
  * Register new client.
@@ -20,14 +19,14 @@ class DoRegisterClient extends Command<Network> {
 
   @Override
   protected final void execute() throws CommandException {
-    int taxNumber = integerField("taxNumber");
-    String name = stringField("name");
-    String key = stringField("key");
-
     try {
-      _receiver.registerClient(name, taxNumber, key);
-    } catch (Exception e) {
-      throw new DuplicateClientKeyException(key);
+      _receiver.registerClient(
+              stringField("name"), 
+              integerField("taxNumber"), 
+              stringField("key")
+      );
+    } catch (prr.core.exception.DuplicateClientKeyException e) {
+      throw new DuplicateClientKeyException(e.key());
     }
   }
 }
