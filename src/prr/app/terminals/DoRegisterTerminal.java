@@ -16,13 +16,20 @@ class DoRegisterTerminal extends Command<Network> {
   DoRegisterTerminal(Network receiver) {
     super(Label.REGISTER_TERMINAL, receiver);
     addStringField("terminalkey", Message.terminalKey());
-    addStringField("terminalType", Message.terminalType());
+    addOptionField("terminalType", Message.terminalType(), "BASIC","FANCY");
     addStringField("clientKey", Message.clientKey());
-
   }
 
   @Override
   protected final void execute() throws CommandException {
-    //FIXME implement command
+    try {
+      _receiver.registerTerminal(stringField("terminalkey"), optionField("terminalType"), stringField("clientKey"));
+    } catch (prr.core.exception.DuplicateTerminalKeyException e) {
+      throw new DuplicateTerminalKeyException(e.key());
+    } catch (prr.core.exception.InvalidTerminalKeyException e) {
+      throw new InvalidTerminalKeyException(e.key());
+    } catch (prr.core.exception.UnknownClientKeyException e) {
+      throw new UnknownClientKeyException(e.key());
+    }
   }
 }
